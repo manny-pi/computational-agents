@@ -37,9 +37,13 @@ class RobotBody(AgentEnvironment):
         Returns the state of the Robot in a dictionary
         """
         
-        return {'robX': self.robX, 'robY': self.robY, 
-        'robDir': self.robDir, 'eyes': self.eyes(), 
-        'pathBlocked': self.pathBlocked}
+        return {
+            'robX': self.robX, 
+            'robY': self.robY, 
+            'robDir': self.robDir, 
+            'eyes': self.eyes(), 
+            'pathBlocked': self.pathBlocked
+            }
     
     initial_percepts = percepts # use percept function for initial percepts too
 

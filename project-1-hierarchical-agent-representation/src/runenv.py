@@ -12,8 +12,10 @@ from gui.robotGUI import RobotGUI
 
 import pygame
 from pygame.time import Clock
-from random import randint 
+from pygame import Surface 
 
+from random import randint 
+from math import sqrt, pow
 
 # create the environment and startup its gui 
 WIDTH = LENGTH = 400
@@ -26,40 +28,47 @@ middle = RobotMiddleLayer(body)
 top = RobotTopLayer(middle, timeout=30)
 robGui = RobotGUI(body)
 
-def genLoc(n): 
+def euclideanDistance(x1, y1, x2, y2): 
+    """Calculates the euclidian distance between given points (x_1, y_1) and (x_2, y_2)."""
+
+    return sqrt(pow(x2 - x1, 2) + pow(y2 - y1, 2))
+
+def getNearestLocation(locations): 
+    minDist = pow(WIDTH * LENGTH, 2)
+    nearestLocation = None
+    for location in locations:
+        dist = euclideanDistance(body.robX, body.robY, location[0], location[1])
+        if dist < minDist: 
+            nearestLocation = location
+            minDist = dist
+
+    return nearestLocation
+
+def generateLocations(n): 
     """
-    Returns a list of random locations in the environment
+    Returns a list of random locations in the environment [(x_1, y_1), ..., (x_n, y_n)]
     """
-    locations = []
+    locations = {}
     for i in range(n): 
-      x = randint(0, WIDTH - 50)
-      x -= (x % 10) if x > 10 else x + (10 - x)
-      
-      y = randint(50, LENGTH - 50)
-      y -= (y % 10) if y > 10 else y + (10 - y)
-      locations.append((x, y))
-    
+        # Calculate random (x, y) coordinates
+        x = randint(0, WIDTH - 50)
+        x -= (x % 10) if x > 10 else x + (10 - x)
+        y = randint(50, LENGTH - 50)
+        y -= (y % 10) if y > 10 else y + (10 - y)
+        loc = (x, y)
+
+        # Create the surface
+        surface = {}
+        surf = Surface((10, 10))
+        surf.fill((255, 0, 0))
+        surface[surf] = surf.get_rect(center=loc) 
+        locations[loc] = surface
+
     return locations
 
-from pygame import Surface 
-def genMarkers(size, locations: list) -> list: 
-    """
-    Generate markers centered at each of the locations provided in list
 
-    Returns a {Surface: Rect} dicitionary
-    """
-    
-    surfaces = {} 
-    for loc in locations: 
-        surf = Surface(size)
-        surf.fill((randint(0, 255), randint(0, 255), randint(0, 255)))
-        surfaces[surf] = loc 
-    return surfaces 
-
-# locations Robot should visit 
-locations = genLoc(50)
-locMarkers = genMarkers((10, 10), locations) 
-nextLocation = locations.pop() 
+locations = generateLocations(50)  # (x, y) coordinates that the robot should visit
+nextLocation = getNearestLocation(locations) 
 
 window = pygame.display.set_mode((environment.WIDTH, environment.LENGTH), display=0)
 running = True
@@ -74,11 +83,12 @@ while running:
     arrived = top.do({'visit': nextLocation})
     if arrived: 
         try: 
-            nextLocation = locations.pop()
-            locMarkers.popitem()
+            del locations[nextLocation]                     # delete the marker of the visited location
+            nextLocation = getNearestLocation(locations)    # get the next location
+
         except IndexError: 
             print("Ran out locations")
-            locations = genLoc(50)
+            locations = generateLocations(50)
             locMarkers = genMarkers((10, 10), locations)
           
             nextLocation = locations.pop() 
@@ -95,8 +105,10 @@ while running:
 
     envGui.surface.blit(robGui.surface, robGui.rect)
     window.blit(envGui.surface, envGui.rect)
-    for marker in locMarkers: 
-        window.blit(marker, marker.get_rect(center=locMarkers[marker]))
+    for key in locations: 
+        location = locations[key]
+        for surf, rect in location.items(): 
+            window.blit(surf, rect)
     
     pygame.display.flip()
 
