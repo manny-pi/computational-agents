@@ -51,9 +51,9 @@ def generateLocations(n):
     locations = {}
     for i in range(n): 
         # Calculate random (x, y) coordinates
-        x = randint(0, WIDTH - 50)
+        x = randint(0, WIDTH - 100)
         x -= (x % 10) if x > 10 else x + (10 - x)
-        y = randint(50, LENGTH - 50)
+        y = randint(50, LENGTH - 100)
         y -= (y % 10) if y > 10 else y + (10 - y)
         loc = (x, y)
 
