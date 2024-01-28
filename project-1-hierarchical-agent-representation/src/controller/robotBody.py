@@ -43,7 +43,7 @@ class RobotBody(AgentEnvironment):
             'robDir': self.robDir, 
             'eyes': self.eyes(), 
             'pathBlocked': self.pathBlocked
-            }
+        }
     
     initial_percepts = percepts # use percept function for initial percepts too
 

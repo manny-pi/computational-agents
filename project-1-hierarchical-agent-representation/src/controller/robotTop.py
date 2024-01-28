@@ -1,5 +1,5 @@
 """
-The RobotTopLayer invokes changes inthe RobotMiddleLayer
+The RobotTopLayer invokes changes in the RobotMiddleLayer.
 """
 
 from .environments import AgentEnvironment
@@ -17,8 +17,9 @@ class RobotTopLayer(AgentEnvironment):
     
     def do(self, plan: dict = None) -> bool: 
         """
-        .do will tell the self.middle the next location to visit
-        plan is a dictionary of locations to visit {'visit': (x1, y1), (x2, y2), ... ]}
+        `do()` will tell the middle layer, `self.middle`, the next location to visit
+        Args:
+            plan: a dictionary of locations to visit {'visit': (x1, y1), (x2, y2), ... ]}
         """
 
         if plan:
@@ -29,6 +30,3 @@ class RobotTopLayer(AgentEnvironment):
                 return True
             else: 
                 return False
-
-
-

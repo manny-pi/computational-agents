@@ -18,7 +18,7 @@ from random import randint
 from math import sqrt, pow
 
 # create the environment and startup its gui 
-WIDTH = LENGTH = 400
+WIDTH = LENGTH = 800
 environment = Environment(width=WIDTH, length=LENGTH)
 envGui = EnvironmentGUI(environment)
 
@@ -51,7 +51,7 @@ def generateLocations(n):
     locations = {}
     for i in range(n): 
         # Calculate random (x, y) coordinates
-        x = randint(0, WIDTH - 100)
+        x = randint(10, WIDTH - 100)
         x -= (x % 10) if x > 10 else x + (10 - x)
         y = randint(50, LENGTH - 100)
         y -= (y % 10) if y > 10 else y + (10 - y)
