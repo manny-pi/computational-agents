@@ -1,5 +1,8 @@
 """
-The RobotMiddleLayer invokes changes in the RobotBody 
+The RobotMiddle layer invokes changes in the RobotBody.
+
+More specifically, it tells the RobotBody Layer to steer the Robot in a direction, 
+and then tells the RobotBody Layer to move the Robot in that direction and update its percepts.
 """
 
 from .environments import AgentEnvironment
@@ -15,8 +18,9 @@ class RobotMiddleLayer(AgentEnvironment):
         """
         Does nothing / The middle layer doesn't have any initial percepts, but 
         has to be implemented because this class is a subclass of agents.Environment
+        
+        NOTE: I don't think my docs for this function are accurate. Need to revise, for sure.
         """
-
         return {}
     
     def do(self, action: dict) -> dict: 
@@ -28,11 +32,12 @@ class RobotMiddleLayer(AgentEnvironment):
         returns {'arrived': True} when arrived is True 
             or {'arrived' False} if the Robot timed out 
         """ 
-
-        if 'timeout' in action: # Execut e if the Robot can timeout 
+        
+        if 'timeout' in action: # Execute if the Robot can timeout 
             remaining = action['timeout']
         else: 
             remaining = -1  # Execute if the Robot never times out
+
         target_pos = action['go_to'] 
         arrived = self.close_enough(target_pos)
         while not arrived and remaining != 0: 
@@ -47,8 +52,8 @@ class RobotMiddleLayer(AgentEnvironment):
         
     def steer(self, target_pos: tuple) -> Direction: 
         """ 
-        Determines how to steer, depending on the location of the object the 
-        Robot is searching for 
+        Determines the direction in which to steer the Robot. Checks for obstacles in the Robot's path,
+        adjusts the steering direction accordingly. 
 
         Returns 'NORTH', 'EAST', 'SOUTH', or 'WEST'
         """ 
@@ -62,7 +67,6 @@ class RobotMiddleLayer(AgentEnvironment):
                 return Direction.WEST 
             elif self.percepts['robDir'] == Direction.WEST: 
                 return Direction.NORTH 
-        
         else: 
             goalX, goalY = target_pos 
             robX, robY = self.percepts['robX'], self.percepts['robY']

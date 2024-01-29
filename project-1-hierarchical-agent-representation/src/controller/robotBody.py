@@ -1,7 +1,7 @@
 """
 The RobotBody acts as an Environment that the layers above it can influence 
 
-It receives commands from the Robot Middle Layer and acts them out in the environment
+It receives commands from the Robot Middle Layer and acts them out in the 'physical' environment
 """
 
 from .environments import AgentEnvironment
@@ -51,7 +51,7 @@ class RobotBody(AgentEnvironment):
         """ 
         Performs an 'action' given by the Robot Middle Layer
 
-        action is {'steer': directionf}
+        action is {'steer': direction}
         direction is NORTH, EAST, SOUTH, or WEST
         """
 
