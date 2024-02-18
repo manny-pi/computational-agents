@@ -19,13 +19,6 @@ from pygame import Surface
 from random import randint 
 from math import sqrt, pow
 
-
-class Point:
-    def __init__(self, x, y): 
-        self.x = x
-        self.y = y 
-
-
 # create the environment and startup its gui 
 WIDTH = LENGTH = 800
 environment = Environment(width=WIDTH, length=LENGTH)
@@ -37,26 +30,16 @@ middle = RobotMiddleLayer(body)
 top = RobotTopLayer(middle, timeout=30)
 robGui = RobotGUI(body)
 
-def euclideanDistance(p1, p2): 
-    """Calculates the euclidian distance between given points (x_1, y_1) and (x_2, y_2).
-    
-    Args:
-        p1 (Point): first point
-        p2 (Point): second point
-    
-    Returns:
-        float: the euclidian distance between the two points 
-    """
-    return sqrt(pow(p2.x - p1.x, 2) + pow(p2.y - p1.y, 2))
+def euclideanDistance(x1, y1, x2, y2): 
+    """Calculates the euclidian distance between given points (x_1, y_1) and (x_2, y_2)."""
+
+    return sqrt(pow(x2 - x1, 2) + pow(y2 - y1, 2))
 
 def getNearestLocation(locations): 
-    """
-    Scans a list of points, and returns the one nearest to the robot.
-    """
     minDist = pow(WIDTH * LENGTH, 2)
     nearestLocation = None
     for location in locations:
-        dist = euclideanDistance(Point(body.robX, body.robY), Point(location[0], location[1]))
+        dist = euclideanDistance(body.robX, body.robY, location[0], location[1])
         if dist < minDist: 
             nearestLocation = location
             minDist = dist
@@ -76,7 +59,7 @@ def generateLocations(n):
         y -= (y % 10) if y > 10 else y + (10 - y)
         loc = (x, y)
 
-        # Create the surface where the location marker is drawn to
+        # Create the surface
         surface = {}
         surf = Surface((10, 10))
         surf.fill((255, 0, 0))
@@ -93,16 +76,11 @@ window = pygame.display.set_mode((environment.WIDTH, environment.LENGTH), displa
 running = True
 clock = Clock()
 
-searchStarted = False
 stepsToGoal = 0
 while running: 
     for event in pygame.event.get(): 
         if event.type == pygame.QUIT: 
             running = False
-
-    if not searchStarted: 
-        searchStarted = True
-        top.do({'visit': locations})
 
     arrived = top.do({'visit': nextLocation})
     if arrived: 
