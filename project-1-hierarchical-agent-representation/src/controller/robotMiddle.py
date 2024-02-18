@@ -5,8 +5,8 @@ More specifically, it tells the RobotBody Layer to steer the Robot in a directio
 and then tells the RobotBody Layer to move the Robot in that direction and update its percepts.
 """
 
-from .environments import AgentEnvironment
-from .directions import Direction
+from environments import AgentEnvironment
+from directions import Direction
 
 
 class RobotMiddleLayer(AgentEnvironment): 
@@ -44,16 +44,15 @@ class RobotMiddleLayer(AgentEnvironment):
             self.percepts = self.env.do({'steer': self.steer(target_pos)})
             remaining -= 1
             arrived = self.close_enough(target_pos)
-
-            if not arrived: 
-                return # so the gui can update after every move 
-
         return {'arrived': arrived}
         
     def steer(self, target_pos: tuple) -> Direction: 
         """ 
         Determines the direction in which to steer the Robot. Checks for obstacles in the Robot's path,
         adjusts the steering direction accordingly. 
+
+        NOTE: The current implementation just turns the Agent 90 degrees to the right. There are definitely
+        other ways to implement this function.
 
         Returns 'NORTH', 'EAST', 'SOUTH', or 'WEST'
         """ 
@@ -69,16 +68,16 @@ class RobotMiddleLayer(AgentEnvironment):
                 return Direction.NORTH 
         else: 
             goalX, goalY = target_pos 
-            robX, robY = self.percepts['robX'], self.percepts['robY']
+            x, y = self.percepts['x'], self.percepts['y']
 
             # turn the Robot in the direction of target_pos
-            if goalX > robX: 
+            if goalX > x: 
                 return Direction.EAST
-            elif goalX < robX: 
+            elif goalX < x: 
                 return Direction.WEST
-            elif goalY > robY: 
+            elif goalY > y: 
                 return Direction.SOUTH 
-            elif goalY < robY: 
+            elif goalY < y: 
                 return Direction.NORTH
 
     def close_enough(self, target_pos) -> bool:
@@ -88,9 +87,9 @@ class RobotMiddleLayer(AgentEnvironment):
 
         goalX, goalY = target_pos
         percepts = self.env.percepts()
-        robX, robY = percepts['robX'], percepts['robY']
+        x, y = percepts['x'], percepts['y']
 
-        if abs(robX - goalX) == 0 and abs(robY - goalY) == 0: 
+        if abs(x - goalX) == 0 and abs(y - goalY) == 0: 
             return True
 
         return False

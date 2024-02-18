@@ -1,5 +1,7 @@
+#! /usr/local/bin/python3.8
+
 """
-Run the environment
+Run the environment.
 """
 
 from controller.robotBody import RobotBody
