@@ -41,13 +41,10 @@ class RobotMiddleLayer(AgentEnvironment):
             arrived = self.close_enough(target_pos)
         return {'arrived': arrived}
         
-    def steer(self, target_pos: tuple) -> Direction: 
+    def steer(self, target_pos: "tuple[int, int]") -> Direction: 
         """ 
         Determines how to steer, depending on the location of the object the 
         Robot is searching for 
-
-        NOTE: The current implementation just turns the Agent 90 degrees to the right. There are definitely
-        other ways to implement this function.
 
         Returns 'NORTH', 'EAST', 'SOUTH', or 'WEST'
         """ 
