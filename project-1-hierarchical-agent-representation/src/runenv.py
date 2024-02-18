@@ -4,114 +4,88 @@
 Run the environment.
 """
 
-from controller.robotBody import RobotBody
-from controller.robotMiddle import RobotMiddleLayer
-from controller.robotTop import RobotTopLayer
 from controller.environment import Environment
-
+import controller.agent as agent
+from gui.sprite import GenericSprite, GenericSpriteGroup
 from gui.envGUI import EnvironmentGUI
-from gui.robotGUI import RobotGUI
-
 import pygame
 from pygame.time import Clock
-from pygame import Surface 
+from pygame.colordict import THECOLORS
 
-from random import randint 
-from math import sqrt, pow
+# Initialize modules
+pygame.init()
+update_queue, lock = agent.init()
 
-# create the environment and startup its gui 
-WIDTH = LENGTH = 800
+# Instantiate the AgentThread
+agentThread = agent.AgentThread("AgentThread")
+env_info = agentThread.get_env_info()
+
+# Start the AgentThread
+agentThread.start()
+
+# Create the environment and startup its gui
+WIDTH, LENGTH = env_info[0], env_info[1]
 environment = Environment(width=WIDTH, length=LENGTH)
 envGui = EnvironmentGUI(environment)
-
-# create the robot and startup its gui 
-body = RobotBody(environment)
-middle = RobotMiddleLayer(body)
-top = RobotTopLayer(middle, timeout=30)
-robGui = RobotGUI(body)
-
-def euclideanDistance(x1, y1, x2, y2): 
-    """Calculates the euclidian distance between given points (x_1, y_1) and (x_2, y_2)."""
-
-    return sqrt(pow(x2 - x1, 2) + pow(y2 - y1, 2))
-
-def getNearestLocation(locations): 
-    minDist = pow(WIDTH * LENGTH, 2)
-    nearestLocation = None
-    for location in locations:
-        dist = euclideanDistance(body.robX, body.robY, location[0], location[1])
-        if dist < minDist: 
-            nearestLocation = location
-            minDist = dist
-
-    return nearestLocation
-
-def generateLocations(n): 
-    """
-    Returns a list of random locations in the environment [(x_1, y_1), ..., (x_n, y_n)]
-    """
-    locations = {}
-    for i in range(n): 
-        # Calculate random (x, y) coordinates
-        x = randint(10, WIDTH - 100)
-        x -= (x % 10) if x > 10 else x + (10 - x)
-        y = randint(50, LENGTH - 100)
-        y -= (y % 10) if y > 10 else y + (10 - y)
-        loc = (x, y)
-
-        # Create the surface
-        surface = {}
-        surf = Surface((10, 10))
-        surf.fill((255, 0, 0))
-        surface[surf] = surf.get_rect(center=loc) 
-        locations[loc] = surface
-
-    return locations
-
-
-locations = generateLocations(50)  # (x, y) coordinates that the robot should visit
-nextLocation = getNearestLocation(locations) 
-
-window = pygame.display.set_mode((environment.WIDTH, environment.LENGTH), display=0)
-running = True
+window = pygame.display.set_mode((WIDTH, LENGTH))
 clock = Clock()
 
-stepsToGoal = 0
-while running: 
-    for event in pygame.event.get(): 
-        if event.type == pygame.QUIT: 
+# List to hold all sprites
+all_sprites = GenericSpriteGroup()
+all_sprites_dict = dict()
+
+
+def reducer(event):
+    event_type = event.get("type")
+    if event_type == "sprite-init" or event_type == "sprite-update":
+        info = event.get("info")
+        ID = info.get("ID")
+
+        if event_type == "sprite-init":
+            if ID in all_sprites_dict:
+                raise Exception("Sprite already exists!")
+
+            name = info.get("name")
+            coordinates = info.get("coordinates")
+            sprite = GenericSprite(ID, coordinates=coordinates)
+            if name == "agent":
+                sprite.set_color((0, 0, 255))
+
+            all_sprites.add(sprite)
+            all_sprites_dict[ID] = sprite
+        elif event_type == "sprite-update":
+            coordinates = info.get("coordinates")
+            if ID in all_sprites_dict:
+                sprite = all_sprites_dict.get(ID)
+                sprite.set_coordinates(coordinates)
+            else: 
+                raise Exception(f"Sprite (sprite{ID}) not found.")
+
+
+def render_all():
+    """Renders the sprites without actually drawing them to the screen."""
+    envGui.surface.fill(THECOLORS["aqua"])
+    for sprite in all_sprites:
+        envGui.surface.blit(sprite.get_surface(), sprite.get_rect())
+
+    window.blit(envGui.surface, envGui.rect)
+
+
+# Graphics Loop
+running = True
+while running:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
             running = False
 
-    arrived = top.do({'visit': nextLocation})
-    if arrived: 
-        try: 
-            del locations[nextLocation]                     # delete the marker of the visited location
-            nextLocation = getNearestLocation(locations)    # get the next location
+    lock.acquire()
+    try:
+        reducer(update_queue.popleft())
+    except IndexError:
+        pass
+    lock.release()
 
-        except IndexError: 
-            print("Ran out locations")
-            locations = generateLocations(50)
-            locMarkers = genMarkers((10, 10), locations)
-          
-            nextLocation = locations.pop() 
-
-        print(f"Arrived @ {nextLocation} -> {'yes' if arrived else 'timed-out'} | Steps Taken: {stepsToGoal}")
-
-        stepsToGoal = 0
-        arrived = False
-    else: 
-      stepsToGoal += 1 
-
-    robGui.updateLoc()
-    envGui.refresh() 
-
-    envGui.surface.blit(robGui.surface, robGui.rect)
-    window.blit(envGui.surface, envGui.rect)
-    for key in locations: 
-        location = locations[key]
-        for surf, rect in location.items(): 
-            window.blit(surf, rect)
-    
+    render_all()
     pygame.display.flip()
 
-    clock.tick(10)
+    clock.tick(5)

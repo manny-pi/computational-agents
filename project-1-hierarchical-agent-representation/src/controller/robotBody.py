@@ -1,11 +1,7 @@
 """
 The RobotBody acts as an Environment that the layers above it can influence.
 
-<<<<<<< HEAD
 It receives commands from the Robot Middle Layer and acts them out in the 'physical' environment. 
-=======
-It receives commands from the Robot Middle Layer and acts them out in the environment
->>>>>>> parent of c8a4c10 (Commit before architecture change.)
 """
 
 from environments import AgentEnvironment

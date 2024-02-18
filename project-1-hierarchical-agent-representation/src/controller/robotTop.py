@@ -26,7 +26,6 @@ class RobotTopLayer(AgentEnvironment):
             plan: a dictionary of locations to visit {'visit': [(x1, y1), (x2, y2), ... ]}
         """
 
-<<<<<<< HEAD
         from time import sleep
         locations = plan['visit']
         for loc in locations:
@@ -37,13 +36,3 @@ class RobotTopLayer(AgentEnvironment):
                 print(f"Arrived at {loc}.")
             else: 
                 print(f"Error visiting {loc}: Timed out.")
-=======
-        if plan:
-            loc = plan['visit']
-            arrived = self.middle.do({'go_to': loc, 'timeout': self.timeout}) # change percepts in middle layer
-            
-            if arrived: # if the robot has arrived
-                return True
-            else: 
-                return False
->>>>>>> parent of c8a4c10 (Commit before architecture change.)
