@@ -54,12 +54,12 @@ def reducer(event):
             all_sprites.add(sprite)
             all_sprites_dict[ID] = sprite
         elif event_type == "sprite-update":
-            coordinates = info.get("coordinates")
-            if ID in all_sprites_dict:
-                sprite = all_sprites_dict.get(ID)
-                sprite.set_coordinates(coordinates)
-            else: 
+            if ID not in all_sprites_dict:
                 raise Exception(f"Sprite (sprite{ID}) not found.")
+
+            coordinates = info.get("coordinates")
+            sprite = all_sprites_dict.get(ID)
+            sprite.set_coordinates(coordinates)
 
 
 def render_all():
